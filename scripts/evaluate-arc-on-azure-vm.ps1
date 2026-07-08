@@ -45,7 +45,10 @@ param(
     [switch]$Cleanup
 )
 
-$ErrorActionPreference = "Stop"
+# Azure CLI (a native command) writes progress/warnings to stderr. Under
+# $ErrorActionPreference='Stop', Windows PowerShell turns that into a terminating
+# error, so we use 'Continue' and check $LASTEXITCODE explicitly for az calls.
+$ErrorActionPreference = "Continue"
 
 function Assert-Az {
     if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
@@ -180,6 +183,7 @@ $sp = az ad sp create-for-rbac --name $SpName --role "Azure Connected Machine On
         --scopes "/subscriptions/$sub/resourceGroups/$ResourceGroup" -o json | ConvertFrom-Json
 $appId  = $sp.appId
 $secret = $sp.password
+if ([string]::IsNullOrWhiteSpace($appId)) { throw "Failed to create the onboarding service principal '$SpName'." }
 Start-Sleep -Seconds 20   # allow service principal to propagate
 
 # $env:ProgramFiles must stay literal for the in-guest shell (escaped with a backtick).
