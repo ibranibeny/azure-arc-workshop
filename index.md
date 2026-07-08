@@ -57,6 +57,7 @@ experienced practitioners can jump straight to the L400 build lab.
 ## How Azure Arc works, in one minute
 
 ```mermaid
+%% Colored per the mermaid-diagrams skill (classDef + subgraph style)
 flowchart LR
     subgraph Outside["Outside Azure (on-prem / other cloud / edge)"]
         S[Windows / Linux Server]
@@ -73,6 +74,22 @@ flowchart LR
         UPD[Update Manager]
         ARM --- POL & DEF & MON & UPD
     end
+
+    %% Color palette
+    classDef server fill:#107C10,stroke:#0B5A0B,color:#ffffff;
+    classDef sql fill:#CC2927,stroke:#8B1A19,color:#ffffff;
+    classDef agent fill:#5C2D91,stroke:#3B1C5E,color:#ffffff;
+    classDef arm fill:#0078D4,stroke:#004578,color:#ffffff;
+    classDef svc fill:#50E6FF,stroke:#0078D4,color:#003350;
+
+    class S server
+    class Q sql
+    class A agent
+    class ARM arm
+    class POL,DEF,MON,UPD svc
+
+    style Outside fill:#1b1b1b,stroke:#8A8A8A,color:#ffffff
+    style Azure fill:#0b2545,stroke:#0078D4,color:#ffffff
 ```
 
 Ready? **[Begin with Lab 01 → Azure Arc Overview](labs/01-arc-overview){: .btn .btn-primary }**

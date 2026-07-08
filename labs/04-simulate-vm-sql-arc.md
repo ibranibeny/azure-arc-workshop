@@ -39,6 +39,7 @@ tear it all down.
 ## Architecture of this lab
 
 ```mermaid
+%% Colored per the mermaid-diagrams skill (classDef + subgraph style)
 flowchart TB
     subgraph RG["Resource group: rg-arc-l400 (indonesiacentral)"]
         subgraph VM["Windows Server 2022 VM (simulated on-prem)"]
@@ -51,6 +52,24 @@ flowchart TB
     AGENT -->|outbound 443| ARC[Azure Arc control plane]
     ARC --> ARCVM[Arc-enabled server resource]
     ARC --> ARCSQL[Arc-enabled SQL Server resource]
+
+    %% Color palette
+    classDef sql fill:#CC2927,stroke:#8B1A19,color:#ffffff;
+    classDef agent fill:#5C2D91,stroke:#3B1C5E,color:#ffffff;
+    classDef fw fill:#D83B01,stroke:#A32D01,color:#ffffff;
+    classDef identity fill:#FFB900,stroke:#B38600,color:#3b2f00;
+    classDef arc fill:#0078D4,stroke:#004578,color:#ffffff;
+    classDef resource fill:#50E6FF,stroke:#0078D4,color:#003350;
+
+    class SQL sql
+    class AGENT agent
+    class FW fw
+    class SP identity
+    class ARC arc
+    class ARCVM,ARCSQL resource
+
+    style RG fill:#0b2545,stroke:#0078D4,color:#ffffff
+    style VM fill:#1b1b1b,stroke:#8A8A8A,color:#ffffff
 ```
 
 {: .important }
