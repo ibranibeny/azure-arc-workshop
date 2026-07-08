@@ -14,6 +14,10 @@ color_scheme: dark
 search_enabled: true
 heading_anchors: true
 
+# Render ```mermaid fenced blocks as diagrams
+mermaid:
+  version: "10.9.1"
+
 # Header link to the repo
 aux_links:
   "View on GitHub":
