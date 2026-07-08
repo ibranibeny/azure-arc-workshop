@@ -17,7 +17,7 @@ fully scripted build lab. Published as a static site with GitHub Pages.
 ## Running the L400 lab
 
 The L400 build lab provisions everything with the Azure CLI. See
-[`labs/04-simulate-vm-sql-arc.md`](labs/04-simulate-vm-sql-arc.md). The in-guest
+[`_labs/04-simulate-vm-sql-arc.md`](_labs/04-simulate-vm-sql-arc.md). The in-guest
 bootstrap script is provided at [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1).
 
 > ⚠️ The lab uses a **lab-only** technique (blocking the Azure IMDS endpoint) to make an

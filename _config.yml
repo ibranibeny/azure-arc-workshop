@@ -1,56 +1,98 @@
-title: Azure Arc Workshop
+title: "Azure Arc Workshop"
+subtitle: "Hands-on labs for Azure Arc (L100–L400)"
 description: >-
-  A hands-on Azure Arc workshop covering L100 to L400 — overview, business value,
-  onboarding Windows Server and SQL Server, and a full L400 simulation lab that
-  deploys a Windows + SQL Server VM and projects it into Azure Arc (Indonesia Central).
-remote_theme: just-the-docs/just-the-docs
+  A hands-on Azure Arc workshop: overview, business value, onboarding Windows Server
+  and SQL Server, and an L400 az CLI simulation lab targeting Indonesia Central.
+url: "https://ibranibeny.github.io"
+baseurl: "/azure-arc-workshop"
+
+# Theme (matches the MCS-labs look)
+remote_theme: mmistakes/minimal-mistakes
+minimal_mistakes_skin: "air"
+
+locale: "en-US"
+
+# Search
+search: true
+search_full_content: true
+
+# Breadcrumbs + copy-code button (like MCS-labs)
+breadcrumbs: true
+enable_copy_code_button: true
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
 
 plugins:
   - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-include-cache
 
-# Site behaviour
-color_scheme: dark
-search_enabled: true
-heading_anchors: true
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "highlight"
 
-# Render ```mermaid fenced blocks as diagrams
-mermaid:
-  version: "10.9.1"
+# Render Mermaid diagrams after page load
+after_footer_scripts:
+  - /assets/js/mermaid-init.js
 
-# Header link to the repo
-aux_links:
-  "View on GitHub":
-    - "https://github.com/ibranibeny/azure-arc-workshop"
-aux_links_new_tab: true
+# Site author (sidebar)
+author:
+  name: "Azure Arc Workshop"
+  bio: "Hands-on labs for Azure Arc (L100–L400)"
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/ibranibeny/azure-arc-workshop"
+    - label: "Azure Arc docs"
+      icon: "fas fa-fw fa-book"
+      url: "https://learn.microsoft.com/azure/azure-arc/"
 
-# External quick links in the left nav
-nav_external_links:
-  - title: Azure Arc documentation
-    url: https://learn.microsoft.com/azure/azure-arc/
-    hide_icon: false
+# Footer
+footer:
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/ibranibeny/azure-arc-workshop"
+    - label: "Azure Arc docs"
+      icon: "fas fa-fw fa-book"
+      url: "https://learn.microsoft.com/azure/azure-arc/"
 
-footer_content: >-
-  Community workshop. Technical content grounded in Microsoft Learn.
-  Diagrams courtesy of Microsoft. &copy; 2026.
+# Collections
+collections:
+  labs:
+    output: true
+    permalink: /labs/:name/
 
-# Callout styles (just-the-docs)
-callouts:
-  note:
-    title: Note
-    color: blue
-  tip:
-    title: Tip
-    color: green
-  warning:
-    title: Warning
-    color: yellow
-  important:
-    title: Important
-    color: purple
+# Default front matter
+defaults:
+  - scope:
+      path: ""
+      type: "labs"
+    values:
+      layout: "lab"
+      author_profile: false
+      toc: true
+      toc_sticky: true
+      toc_label: "On this page"
+      toc_icon: "bookmark"
+      read_time: false
+      share: false
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "single"
+      author_profile: false
 
 exclude:
   - README.md
   - Gemfile
   - Gemfile.lock
   - vendor
+  - scripts

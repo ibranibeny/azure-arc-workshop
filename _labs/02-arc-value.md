@@ -1,23 +1,13 @@
 ---
-title: 02 · The Value of Azure Arc
-layout: default
-nav_order: 3
----
-
-# Lab 02 · The Value of Azure Arc
-{: .no_toc }
-{: .fs-7 }
-
-**Level 200 · Concept · ~25 minutes**
-{: .fs-4 .fw-300 }
-
-<details open markdown="block">
-  <summary>On this page</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+title: "The Value of Azure Arc"
+excerpt: "Explore the governance, security, and management value of Azure Arc."
+level: 200
+duration: "25 min"
+doc_type: "Concept"
+persona: "IT pro / architect / decision maker"
+learning_path: "Azure Arc Fundamentals"
+nav_order: 2
+report_issue: "https://github.com/ibranibeny/azure-arc-workshop/issues/new"
 ---
 
 ## Lab details
@@ -112,9 +102,10 @@ The same core management capabilities apply across the Arc "machines" services:
   depend on the **license type** you declare (`LicenseOnly`, `Paid`/Software Assurance, or
   `PAYG`). You'll set this in Labs 03 and 04.
 
-{: .tip }
-> Start free: onboard machines, build your inventory, and apply baseline policy at no
-> control-plane cost. Turn on paid services deliberately, where they deliver value.
+<div class="notice--success" markdown="1">
+**Tip:** Start free — onboard machines, build your inventory, and apply baseline policy at no
+control-plane cost. Turn on paid services deliberately, where they deliver value.
+</div>
 
 ## Test your understanding
 
@@ -138,8 +129,3 @@ The same core management capabilities apply across the Arc "machines" services:
 - Azure Arc's value = **unified inventory + governance + security + operations + data services**.
 - It lets you adopt **cloud management practices without migrating workloads first**.
 - Core server control-plane capabilities are **free**; you opt into paid services deliberately.
-
----
-
-[⬅ Previous: Azure Arc Overview](01-arc-overview){: .btn }
-[Next: Onboard Windows Server & SQL Server ➡](03-onboard-windows-sql){: .btn .btn-primary .float-right }

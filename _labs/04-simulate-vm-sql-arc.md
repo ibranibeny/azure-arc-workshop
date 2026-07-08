@@ -1,23 +1,13 @@
 ---
-title: 04 · Simulate a Windows + SQL VM into Arc
-layout: default
-nav_order: 5
----
-
-# Lab 04 · Simulate a Windows + SQL Server VM and onboard to Azure Arc
-{: .no_toc }
-{: .fs-7 }
-
-**Level 400 · Build lab · ~60 minutes · Region: Indonesia Central**
-{: .fs-4 .fw-300 }
-
-<details open markdown="block">
-  <summary>On this page</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+title: "Simulate a Windows + SQL Server VM into Azure Arc"
+excerpt: "Deploy and onboard a full simulated environment with the az CLI (Indonesia Central)."
+level: 400
+duration: "60 min"
+doc_type: "Build lab"
+persona: "Cloud engineer / architect"
+learning_path: "Azure Arc Hands-on"
+nav_order: 4
+report_issue: "https://github.com/ibranibeny/azure-arc-workshop/issues/new"
 ---
 
 ## Lab details
@@ -68,16 +58,17 @@ flowchart TB
     class ARC arc
     class ARCVM,ARCSQL resource
 
-    style RG fill:#0b2545,stroke:#0078D4,color:#ffffff
-    style VM fill:#1b1b1b,stroke:#8A8A8A,color:#ffffff
+    style RG fill:#eaf3fb,stroke:#0078D4,color:#003350
+    style VM fill:#f3f3f3,stroke:#8A8A8A,color:#333333
 ```
 
-{: .important }
-> **Why block the IMDS endpoint?** The Connected Machine agent detects when it runs on an
-> Azure VM and **refuses to onboard** (Azure VMs are already Azure resources). To *simulate*
-> an on-premises machine, the bootstrap script blocks outbound access to the Azure Instance
-> Metadata Service (`169.254.169.254`) so the agent treats the VM as a hybrid machine. This
-> is a **lab-only** technique — never do this on a production Azure VM.
+<div class="notice--danger" markdown="1">
+**Why block the IMDS endpoint?** The Connected Machine agent detects when it runs on an
+Azure VM and **refuses to onboard** (Azure VMs are already Azure resources). To *simulate*
+an on-premises machine, the bootstrap script blocks outbound access to the Azure Instance
+Metadata Service (`169.254.169.254`) so the agent treats the VM as a hybrid machine. This
+is a **lab-only** technique — never do this on a production Azure VM.
+</div>
 
 ## Prerequisites
 
@@ -86,10 +77,11 @@ flowchart TB
 - The **Indonesia Central** region enabled on your subscription (it is a standard public region).
 - ~4 vCPU quota for the `Standard_D4s_v5` size in `indonesiacentral` (adjust size if needed).
 
-{: .note }
-> **SQL edition:** This lab installs **SQL Server 2022 Evaluation**, which is the full
-> **Enterprise** feature set for a **180-day trial**. Because it has no Software Assurance,
-> you onboard it to Arc with license type **`LicenseOnly`**.
+<div class="notice--info" markdown="1">
+**SQL edition:** This lab installs **SQL Server 2022 Evaluation**, which is the full
+**Enterprise** feature set for a **180-day trial**. Because it has no Software Assurance,
+you onboard it to Arc with license type **`LicenseOnly`**.
+</div>
 
 ---
 
@@ -148,9 +140,10 @@ az role assignment create \
   --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG}"
 ```
 
-{: .warning }
-> Treat `SP_SECRET` as a credential. Do not commit it or echo it into logs. In production,
-> prefer short-lived onboarding and rotate/delete the SP after use (see Cleanup).
+<div class="notice--warning" markdown="1">
+**Warning:** Treat `SP_SECRET` as a credential. Do not commit it or echo it into logs. In production,
+prefer short-lived onboarding and rotate/delete the SP after use (see Cleanup).
+</div>
 
 ### Step 3 — Deploy the Windows Server VM
 
@@ -172,9 +165,10 @@ az vm open-port --resource-group "$RG" --name "$VM_NAME" \
   --port 3389 --priority 1000 --source-ip-address "$MYIP"
 ```
 
-{: .tip }
-> For a hardened setup, skip `az vm open-port` and use **Azure Bastion** or **`az vm run-command`**
-> (used below) instead of exposing RDP.
+<div class="notice--success" markdown="1">
+**Tip:** For a hardened setup, skip `az vm open-port` and use **Azure Bastion** or **`az vm run-command`**
+(used below) instead of exposing RDP.
+</div>
 
 ---
 
@@ -266,9 +260,10 @@ az vm run-command invoke \
       "SpSecret=$SP_SECRET"
 ```
 
-{: .note }
-> SQL installation + agent onboarding can take several minutes. `az vm run-command` waits
-> for completion and returns the script output, including `azcmagent show` status.
+<div class="notice--info" markdown="1">
+SQL installation + agent onboarding can take several minutes. `az vm run-command` waits
+for completion and returns the script output, including `azcmagent show` status.
+</div>
 
 ### Step 6 — Enable SQL Server on the Arc machine
 
@@ -310,9 +305,10 @@ In the portal: **Azure Arc → Servers** shows `arc-sql-sim` as **Connected**, a
 **Azure Arc → SQL Server instances** shows the Evaluation-edition instance in
 **Indonesia Central**.
 
-{: .tip }
-> Explore the value from Labs 01–02: try **Azure Policy**, **Update Manager**, and
-> **Defender for Cloud** against your new Arc-enabled server and SQL instance.
+<div class="notice--success" markdown="1">
+**Tip:** Explore the value from Labs 01–02: try **Azure Policy**, **Update Manager**, and
+**Defender for Cloud** against your new Arc-enabled server and SQL instance.
+</div>
 
 ---
 
@@ -328,9 +324,10 @@ az group delete --name "$RG" --yes --no-wait
 az ad sp delete --id "$SP_APP_ID"
 ```
 
-{: .warning }
-> `az group delete` permanently removes the VM, disks, network, and Arc resources in
-> `rg-arc-l400`. Make sure you're targeting the lab resource group before running it.
+<div class="notice--warning" markdown="1">
+**Warning:** `az group delete` permanently removes the VM, disks, network, and Arc resources in
+`rg-arc-l400`. Make sure you're targeting the lab resource group before running it.
+</div>
 
 ---
 
@@ -357,8 +354,3 @@ az ad sp delete --id "$SP_APP_ID"
 - The **IMDS-block** technique lets an Azure VM stand in for an on-premises server.
 - SQL Server **Evaluation (Enterprise features)** onboards with **`LicenseOnly`**.
 - Onboarding is repeatable and disposable — **deploy, demo, delete**.
-
----
-
-[⬅ Previous: Onboard Windows Server & SQL Server](03-onboard-windows-sql){: .btn }
-[Back to Home ➡](../){: .btn .btn-primary .float-right }

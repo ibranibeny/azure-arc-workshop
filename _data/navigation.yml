@@ -1,0 +1,7 @@
+main:
+  - title: "Home"
+    url: /
+  - title: "Labs"
+    url: /labs/
+  - title: "Azure Arc docs"
+    url: https://learn.microsoft.com/azure/azure-arc/

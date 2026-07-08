@@ -1,23 +1,13 @@
 ---
-title: 03 · Onboard Windows Server & SQL Server
-layout: default
-nav_order: 4
----
-
-# Lab 03 · Onboard Windows Server & SQL Server to Azure Arc
-{: .no_toc }
-{: .fs-7 }
-
-**Level 300 · How-to · ~40 minutes**
-{: .fs-4 .fw-300 }
-
-<details open markdown="block">
-  <summary>On this page</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+title: "Onboard Windows Server & SQL Server"
+excerpt: "Connect a machine and its SQL Server instance to Azure Arc."
+level: 300
+duration: "40 min"
+doc_type: "How-to"
+persona: "IT pro / cloud engineer"
+learning_path: "Azure Arc Hands-on"
+nav_order: 3
+report_issue: "https://github.com/ibranibeny/azure-arc-workshop/issues/new"
 ---
 
 ## Lab details
@@ -41,11 +31,12 @@ You'll complete two use cases:
 - **Use case 2** — Add the **Azure extension for SQL Server** so the SQL instance is
   projected into Azure as an *Arc-enabled SQL Server* resource.
 
-{: .note }
-> **Azure Arc automatically installs** the Azure extension for SQL Server when a
-> connected machine has SQL Server installed — so in many cases Use Case 2 happens for
-> you. This lab shows the **explicit** path so you understand each step and can control
-> the **license type**.
+<div class="notice--info" markdown="1">
+**Azure Arc automatically installs** the Azure extension for SQL Server when a
+connected machine has SQL Server installed — so in many cases Use Case 2 happens for
+you. This lab shows the **explicit** path so you understand each step and can control
+the **license type**.
+</div>
 
 ## Prerequisites
 
@@ -136,9 +127,10 @@ az connectedmachine list --resource-group "rg-arc-workshop" -o table
 
 In the portal, open **Azure Arc → Servers** and confirm the machine shows **Connected**.
 
-{: .tip }
-> `azcmagent show` reports `Agent Status: Connected` and the assigned Azure Resource ID
-> when everything is healthy.
+<div class="notice--success" markdown="1">
+**Tip:** `azcmagent show` reports `Agent Status: Connected` and the assigned Azure Resource ID
+when everything is healthy.
+</div>
 
 ---
 
@@ -195,11 +187,12 @@ az resource list \
 In the portal, go to **Azure Arc → SQL Server instances** and confirm your instance
 appears with the expected **edition** and **license type**.
 
-{: .warning }
-> If the license type shows **"Configuration needed"**, the onboarding didn't have
-> enough information to set it automatically. Re-run the extension with an explicit
-> `LicenseType`, or set the `ArcSQLServerExtensionDeployment` tag on the machine/resource
-> group/subscription (`Paid`, `PAYG`, `PAYG-Recurring`, or `LicenseOnly`).
+<div class="notice--warning" markdown="1">
+**Warning:** If the license type shows **"Configuration needed"**, the onboarding didn't have
+enough information to set it automatically. Re-run the extension with an explicit
+`LicenseType`, or set the `ArcSQLServerExtensionDeployment` tag on the machine/resource
+group/subscription (`Paid`, `PAYG`, `PAYG-Recurring`, or `LicenseOnly`).
+</div>
 
 ---
 
@@ -226,8 +219,3 @@ appears with the expected **edition** and **license type**.
 - The **Connected Machine agent** projects the server; the **SQL Server extension** projects the database engine.
 - **License type is mandatory** and drives feature availability and billing.
 - Azure Arc can **auto-install** the SQL extension, but explicit control is useful for labs and license accuracy.
-
----
-
-[⬅ Previous: The Value of Azure Arc](02-arc-value){: .btn }
-[Next: L400 Simulation Lab ➡](04-simulate-vm-sql-arc){: .btn .btn-primary .float-right }

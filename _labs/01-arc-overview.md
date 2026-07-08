@@ -1,23 +1,13 @@
 ---
-title: 01 · Azure Arc Overview
-layout: default
-nav_order: 2
----
-
-# Lab 01 · Azure Arc Overview
-{: .no_toc }
-{: .fs-7 }
-
-**Level 100 · Concept · ~20 minutes**
-{: .fs-4 .fw-300 }
-
-<details open markdown="block">
-  <summary>On this page</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+title: "Azure Arc Overview"
+excerpt: "Understand what Azure Arc is and the control-plane model."
+level: 100
+duration: "20 min"
+doc_type: "Concept"
+persona: "IT pro / architect"
+learning_path: "Azure Arc Fundamentals"
+nav_order: 1
+report_issue: "https://github.com/ibranibeny/azure-arc-workshop/issues/new"
 ---
 
 ## Lab details
@@ -77,10 +67,11 @@ Azure Arc lets you manage several resource types hosted **outside** of Azure:
 4. **Azure data services** — e.g., SQL Managed Instance and PostgreSQL running on Arc-enabled Kubernetes.
 5. **VMware vSphere, SCVMM, and Azure Local** — extend Azure to entire virtualization estates via the Arc resource bridge.
 
-{: .note }
-> **Azure Arc-enabled servers** is the entry point for machines. When you connect a
-> machine, it becomes an Azure resource you can organize into resource groups, apply
-> policy to, run scripts on, and tag for search — all from the Azure portal or Azure CLI.
+<div class="notice--info" markdown="1">
+**Azure Arc-enabled servers** is the entry point for machines. When you connect a
+machine, it becomes an Azure resource you can organize into resource groups, apply
+policy to, run scripts on, and tag for search — all from the Azure portal or Azure CLI.
+</div>
 
 ## How connectivity works
 
@@ -124,8 +115,3 @@ By the end of this lab you should be able to:
 - You then manage them with **familiar Azure tools** — one pane of glass.
 - It is **agent-based and outbound-only**, making it firewall-friendly.
 - Arc supports **servers, Kubernetes, SQL Server, data services, and full VM estates**.
-
----
-
-[⬅ Home](../){: .btn }
-[Next: The Value of Azure Arc ➡](02-arc-value){: .btn .btn-primary .float-right }
