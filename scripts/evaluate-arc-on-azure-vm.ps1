@@ -38,6 +38,7 @@ param(
     [string]$VmName         = "arc-eval-sql",
     [string]$VmSize         = "Standard_D4s_v5",
     [string]$AdminUser      = "azureuser",
+    [string]$AdminPassword,
     [string]$SpName         = "sp-arc-eval",
     [switch]$OpenAllInboundPorts,
     [switch]$SkipSql,
@@ -123,13 +124,18 @@ Assert-Az
 az group create --name $ResourceGroup --location $Location -o none
 
 if (-not (Test-Vm)) {
-    $sec = Read-Host "Enter a strong VM admin password" -AsSecureString
-    $pwd = [System.Net.NetworkCredential]::new("", $sec).Password
+    if ([string]::IsNullOrWhiteSpace($AdminPassword)) {
+        # No password supplied - generate a random strong one and show it.
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+        $AdminPassword = (-join (1..20 | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })) + 'Aa9!'
+        $script:PwGenerated = $true
+        Write-Host "Generated VM admin password: $AdminPassword" -ForegroundColor Magenta
+    }
     Write-Host "Creating Windows Server 2022 VM in $Location..." -ForegroundColor Green
     az vm create `
         --resource-group $ResourceGroup --name $VmName `
         --image "MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest" `
-        --size $VmSize --admin-username $AdminUser --admin-password $pwd `
+        --size $VmSize --admin-username $AdminUser --admin-password $AdminPassword `
         --public-ip-sku Standard --nsg-rule NONE -o none
 }
 
@@ -207,4 +213,7 @@ Write-Host "`n=== Verification ===" -ForegroundColor Cyan
 az connectedmachine show -g $ResourceGroup -n $VmName --query "{name:name, status:status}" -o table
 $power = az vm show -d -g $ResourceGroup -n $VmName --query powerState -o tsv
 Write-Host "VM hardware power state: $power"
+if ($script:PwGenerated) {
+    Write-Host "`nVM admin credentials  ->  user: $AdminUser   password: $AdminPassword" -ForegroundColor Magenta
+}
 Write-Host "`nDone. To remove everything, run:  ./evaluate-arc-on-azure-vm.ps1 -Cleanup" -ForegroundColor Yellow
