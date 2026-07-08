@@ -21,6 +21,15 @@
 .PARAMETER OpenAllInboundPorts
     Add an NSG rule that allows ALL inbound traffic to the VM. INSECURE - lab/evaluation only.
 
+.PARAMETER Location
+    Azure region for the physical VM, resource group and NSG. Default: indonesiacentral.
+
+.PARAMETER ArcLocation
+    Azure region where the Arc server resource and the SQL Server Arc extension are
+    registered. May differ from the physical VM region and MUST be a region that
+    supports SQL Server enabled by Azure Arc (e.g. southeastasia). Default: southeastasia.
+    Ref: https://learn.microsoft.com/sql/sql-server/azure-arc/overview#supported-azure-regions
+
 .EXAMPLE
     ./evaluate-arc-on-azure-vm.ps1
 
@@ -34,6 +43,7 @@
 [CmdletBinding()]
 param(
     [string]$Location       = "indonesiacentral",
+    [string]$ArcLocation    = "southeastasia",
     [string]$ResourceGroup  = "rg-arc-eval",
     [string]$VmName         = "arc-eval-sql",
     [string]$VmSize         = "Standard_D4s_v5",
@@ -191,10 +201,12 @@ if ([string]::IsNullOrWhiteSpace($appId)) { throw "Failed to create the onboardi
 Start-Sleep -Seconds 20   # allow service principal to propagate
 
 # $env:ProgramFiles must stay literal for the in-guest shell (escaped with a backtick).
+# --location uses $ArcLocation so the Arc server resource lands in a region that
+# supports SQL Server enabled by Azure Arc (physical VM region can differ).
 $onboard = @"
 Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile C:\ArcLab\azcm.msi
 Start-Process msiexec.exe -ArgumentList '/i C:\ArcLab\azcm.msi /qn' -Wait
-& "`$env:ProgramFiles\AzureConnectedMachineAgent\azcmagent.exe" connect --service-principal-id $appId --service-principal-secret $secret --tenant-id $tenant --subscription-id $sub --resource-group $ResourceGroup --location $Location
+& "`$env:ProgramFiles\AzureConnectedMachineAgent\azcmagent.exe" connect --service-principal-id $appId --service-principal-secret $secret --tenant-id $tenant --subscription-id $sub --resource-group $ResourceGroup --location $ArcLocation
 "@
 Invoke-InGuest -ScriptText $onboard -Label "Install Connected Machine agent and connect to Azure Arc"
 
@@ -208,7 +220,7 @@ if (-not $SkipSql) {
     Set-Content -Path $sf -Value $settings -Encoding UTF8
     az connectedmachine extension create `
         --machine-name $VmName --name "WindowsAgent.SqlServer" `
-        --resource-group $ResourceGroup --location $Location `
+        --resource-group $ResourceGroup --location $ArcLocation `
         --type "WindowsAgent.SqlServer" --publisher "Microsoft.AzureData" `
         --settings "@$sf" -o none
     Remove-Item $sf -Force -ErrorAction SilentlyContinue
@@ -231,7 +243,8 @@ $fqdn  = az vm show -d -g $ResourceGroup -n $VmName --query publicIps -o tsv 2>$
 Write-Host "`n================= Deployment summary =================" -ForegroundColor Cyan
 Write-Host ("Resource group : {0}" -f $ResourceGroup)
 Write-Host ("VM name        : {0}" -f $VmName)
-Write-Host ("Region         : {0}" -f $Location)
+Write-Host ("VM region      : {0}" -f $Location)
+Write-Host ("Arc region     : {0}" -f $ArcLocation)
 Write-Host ("Public IP      : {0}" -f $fqdn)
 Write-Host ("VM power state : {0}" -f $power)
 Write-Host ("Arc status     : {0}" -f $arcStatus)
