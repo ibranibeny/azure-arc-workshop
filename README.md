@@ -1,4 +1,4 @@
-# Azure Arc Workshop (L100–L400)
+# Azure Arc Workshop (L100–L500)
 
 A hands-on, self-paced workshop that teaches **Azure Arc** from first principles to a
 fully scripted build lab. Published as a static site with GitHub Pages.
