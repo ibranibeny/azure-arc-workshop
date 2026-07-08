@@ -1,5 +1,5 @@
 title: "Azure Arc Workshop"
-subtitle: "Hands-on labs for Azure Arc (L100–L500)"
+subtitle: "Hands-on labs for Azure Arc (L100–L400)"
 description: >-
   A hands-on Azure Arc workshop: overview, business value, onboarding Windows Server
   and SQL Server, and an L400 az CLI simulation lab targeting Indonesia Central.
@@ -44,7 +44,7 @@ after_footer_scripts:
 # Site author (sidebar)
 author:
   name: "Azure Arc Workshop"
-  bio: "Hands-on labs for Azure Arc (L100–L500)"
+  bio: "Hands-on labs for Azure Arc (L100–L400)"
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"

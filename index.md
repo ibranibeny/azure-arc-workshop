@@ -15,8 +15,8 @@ excerpt: >-
 
 ## Workshop labs
 
-Six progressive levels (L100 → L500). Beginners can start at L100; experienced
-practitioners can jump straight to the L400/L500 build labs.
+Four progressive levels (L100 → L400). Beginners can start at L100; experienced
+practitioners can jump straight to the L400 build lab.
 
 <div class="lab-cards">
 {% assign labs = site.labs | sort: 'nav_order' %}
