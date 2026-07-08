@@ -83,6 +83,87 @@ corporate firewalls and NAT. Connectivity can be direct, via a proxy, or through
 ![Azure Connected Machine agent architecture](https://learn.microsoft.com/azure/azure-arc/servers/media/agent-overview/connected-machine-agent.png)
 *The Connected Machine agent communicates outbound to Azure Resource Manager. Source: Microsoft Learn.*
 
+## Azure Arc cost structure
+
+Azure Arc uses a **two-layer** cost model: the **control plane is free**, and you only
+pay for **Azure services you choose to attach** to your Arc-enabled resources.
+
+```mermaid
+%% Colored per the mermaid-diagrams skill (classDef + subgraph style)
+flowchart TB
+    subgraph Free["Layer 1 · Control plane — FREE"]
+        F1[Resource organization<br/>management groups & tags]
+        F2[Azure Resource Graph<br/>search & inventory]
+        F3[RBAC access control]
+        F4[Templates & extensions]
+    end
+    subgraph Paid["Layer 2 · Attached Azure services — PAY per use"]
+        P1[Defender for Cloud]
+        P2[Azure Monitor]
+        P3[Update Manager]
+        P4[Machine Configuration policy]
+        P5[SQL Server / ESU]
+    end
+    Free --> Paid
+
+    classDef free fill:#107C10,stroke:#0B5A0B,color:#ffffff;
+    classDef paid fill:#D83B01,stroke:#A32D01,color:#ffffff;
+    class F1,F2,F3,F4 free
+    class P1,P2,P3,P4,P5 paid
+    style Free fill:#eaf7ea,stroke:#107C10,color:#0B5A0B
+    style Paid fill:#fdece4,stroke:#D83B01,color:#7a2200
+```
+
+### Layer 1 — Control plane (no extra cost)
+
+The core Azure Arc control plane for servers is **free**:
+
+| Free capability | What it covers |
+|-----------------|----------------|
+| Resource organization | Azure management groups and tags |
+| Search & indexing | Azure Resource Graph |
+| Access & security | Azure role-based access control (RBAC) |
+| Automation | ARM/Bicep/Terraform templates and extensions |
+| Onboarding | Projecting the machine as an Azure resource ($0/hour meter) |
+
+*Source: [Azure Arc overview → Pricing](https://learn.microsoft.com/azure/azure-arc/overview#pricing) and [Cost governance for Arc-enabled servers](https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/hybrid/arc-enabled-servers/eslz-cost-governance).*
+
+### Layer 2 — Attached Azure services (pay per use)
+
+Any Azure service you enable **on top of** Arc is billed at that service's own rate:
+Microsoft Defender for Cloud, Azure Monitor, Microsoft Sentinel, Azure Update Manager,
+Azure Policy **machine configuration**, Azure Automation, Key Vault, and Private Link.
+
+### Representative public prices
+
+Retrieved live from the **Azure Retail Prices API** (`prices.azure.com`) on **2026-07-08**,
+USD, list price — actual cost varies by region, currency, and agreement.
+{: .notice--info}
+
+| Meter (Azure Retail Prices API) | Public list price |
+|---------------------------------|-------------------|
+| Arc control plane for servers | **Free** ($0) |
+| Machine configuration – guest policy per server | ~$6.00 / server / month |
+| Arc for Kubernetes – policy | $3.00 / vCPU / month |
+| Arc on SCVMM – Basic | $2.50 / physical core / month |
+| SQL Server enabled by Arc – **Standard**, pay-as-you-go | $0.10 / vCore / hour |
+| SQL Server enabled by Arc – **Enterprise**, pay-as-you-go | $0.375 / vCore / hour |
+| SQL Server **ESU** (2014/2016), Standard | $0.19 / vCore / hour |
+| Windows Server 2012 **ESU** (Standard) via Arc | ~$0.0065 / core / hour |
+
+The licensing/cost model for physical-core coverage (e.g., ESU with unlimited
+virtualization) is illustrated here:
+
+![Physical-core licensing with unlimited virtualization](https://learn.microsoft.com/sql/sql-server/azure-arc/media/extended-security-updates/physical-core-licensing-with-vms.svg?view=sql-server-ver17)
+*Physical-core licensing with unlimited virtualization for SQL Server ESUs. Source: Microsoft Learn.*
+
+<div class="notice--success" markdown="1">
+**Tip:** Start free — onboard machines and build inventory, RBAC, and policy at **no control-plane cost**.
+Turn on paid services (Defender, Monitor, ESU, SQL PAYG) deliberately. Estimate combined costs with the
+[Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) and the
+[Azure Arc pricing page](https://azure.microsoft.com/pricing/details/azure-arc/).
+</div>
+
 ## Summary of targets
 
 By the end of this lab you should be able to:
