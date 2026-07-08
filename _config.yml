@@ -1,0 +1,52 @@
+title: Azure Arc Workshop
+description: >-
+  A hands-on Azure Arc workshop covering L100 to L400 — overview, business value,
+  onboarding Windows Server and SQL Server, and a full L400 simulation lab that
+  deploys a Windows + SQL Server VM and projects it into Azure Arc (Indonesia Central).
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+# Site behaviour
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
+
+# Header link to the repo
+aux_links:
+  "View on GitHub":
+    - "https://github.com/ibranibeny/azure-arc-workshop"
+aux_links_new_tab: true
+
+# External quick links in the left nav
+nav_external_links:
+  - title: Azure Arc documentation
+    url: https://learn.microsoft.com/azure/azure-arc/
+    hide_icon: false
+
+footer_content: >-
+  Community workshop. Technical content grounded in Microsoft Learn.
+  Diagrams courtesy of Microsoft. &copy; 2026.
+
+# Callout styles (just-the-docs)
+callouts:
+  note:
+    title: Note
+    color: blue
+  tip:
+    title: Tip
+    color: green
+  warning:
+    title: Warning
+    color: yellow
+  important:
+    title: Important
+    color: purple
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
