@@ -148,14 +148,18 @@ if ($OpenAllInboundPorts) { Open-AllInbound }
 # ---------------------------------------------------------------------------
 # Step 2 - Prepare the VM to look like on-premises (Microsoft Learn procedure)
 # ---------------------------------------------------------------------------
+# NOTE: We only set the Guest Agent to Disabled here (do NOT stop it). az vm
+# run-command depends on the running Guest Agent to return results, so stopping
+# it mid-script would hang every subsequent step. The agent keeps running through
+# prep/SQL/onboarding (MSFT_ARC_TEST=true bypasses the Azure-VM guard) and is only
+# actually taken down by the final reboot in Step 6 (startup is already Disabled).
 $prep = @'
 [System.Environment]::SetEnvironmentVariable("MSFT_ARC_TEST","true",[System.EnvironmentVariableTarget]::Machine)
 Set-Service WindowsAzureGuestAgent -StartupType Disabled -Verbose
-Stop-Service WindowsAzureGuestAgent -Force -Verbose
 New-NetFirewallRule -Name BlockAzureIMDS -DisplayName "Block access to Azure IMDS" -Enabled True -Profile Any -Direction Outbound -Action Block -RemoteAddress 169.254.169.254
 New-NetFirewallRule -Name BlockAzureLocalIMDS -DisplayName "Block access to Azure Local IMDS" -Enabled True -Profile Any -Direction Outbound -Action Block -RemoteAddress 169.254.169.253
 '@
-Invoke-InGuest -ScriptText $prep -Label "Prepare VM (MSFT_ARC_TEST, disable Guest Agent, block IMDS)"
+Invoke-InGuest -ScriptText $prep -Label "Prepare VM (MSFT_ARC_TEST, set Guest Agent Disabled, block IMDS)"
 
 # ---------------------------------------------------------------------------
 # Step 3 - Install SQL Server 2022 Enterprise (Evaluation)
@@ -209,6 +213,12 @@ if (-not $SkipSql) {
         --settings "@$sf" -o none
     Remove-Item $sf -Force -ErrorAction SilentlyContinue
 }
+
+# ---------------------------------------------------------------------------
+# Step 6 - Reboot to actually take the Guest Agent down (startup already Disabled)
+# ---------------------------------------------------------------------------
+Write-Host ">> Rebooting VM to finalize on-premises simulation (Guest Agent off)..." -ForegroundColor Green
+az vm restart -g $ResourceGroup -n $VmName -o none
 
 # ---------------------------------------------------------------------------
 # Summary - status + credentials
