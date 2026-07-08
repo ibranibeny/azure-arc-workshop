@@ -211,13 +211,26 @@ if (-not $SkipSql) {
 }
 
 # ---------------------------------------------------------------------------
-# Verify
+# Summary - status + credentials
 # ---------------------------------------------------------------------------
-Write-Host "`n=== Verification ===" -ForegroundColor Cyan
-az connectedmachine show -g $ResourceGroup -n $VmName --query "{name:name, status:status}" -o table
-$power = az vm show -d -g $ResourceGroup -n $VmName --query powerState -o tsv
-Write-Host "VM hardware power state: $power"
+$arcStatus = az connectedmachine show -g $ResourceGroup -n $VmName --query status -o tsv 2>$null
+if ([string]::IsNullOrWhiteSpace($arcStatus)) { $arcStatus = "not connected yet" }
+$power = az vm show -d -g $ResourceGroup -n $VmName --query powerState -o tsv 2>$null
+$fqdn  = az vm show -d -g $ResourceGroup -n $VmName --query publicIps -o tsv 2>$null
+
+Write-Host "`n================= Deployment summary =================" -ForegroundColor Cyan
+Write-Host ("Resource group : {0}" -f $ResourceGroup)
+Write-Host ("VM name        : {0}" -f $VmName)
+Write-Host ("Region         : {0}" -f $Location)
+Write-Host ("Public IP      : {0}" -f $fqdn)
+Write-Host ("VM power state : {0}" -f $power)
+Write-Host ("Arc status     : {0}" -f $arcStatus)
+Write-Host ("Admin user     : {0}" -f $AdminUser)
 if ($script:PwGenerated) {
-    Write-Host "`nVM admin credentials  ->  user: $AdminUser   password: $AdminPassword" -ForegroundColor Magenta
+    Write-Host ("Admin password : {0}   (auto-generated)" -f $AdminPassword) -ForegroundColor Magenta
 }
-Write-Host "`nDone. To remove everything, run:  ./evaluate-arc-on-azure-vm.ps1 -Cleanup" -ForegroundColor Yellow
+elseif (-not [string]::IsNullOrWhiteSpace($AdminPassword)) {
+    Write-Host  "Admin password : (the value you passed via -AdminPassword)"
+}
+Write-Host "======================================================" -ForegroundColor Cyan
+Write-Host ("Cleanup: ./evaluate-arc-on-azure-vm.ps1 -ResourceGroup {0} -Cleanup" -f $ResourceGroup) -ForegroundColor Yellow
