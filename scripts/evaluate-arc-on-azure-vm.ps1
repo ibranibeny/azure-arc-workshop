@@ -18,6 +18,9 @@
 .PARAMETER SkipSql
     Skip installing SQL Server and enabling the SQL extension (VM + Arc only).
 
+.PARAMETER OpenAllInboundPorts
+    Add an NSG rule that allows ALL inbound traffic to the VM. INSECURE - lab/evaluation only.
+
 .EXAMPLE
     ./evaluate-arc-on-azure-vm.ps1
 
@@ -36,6 +39,7 @@ param(
     [string]$VmSize         = "Standard_D4s_v5",
     [string]$AdminUser      = "azureuser",
     [string]$SpName         = "sp-arc-eval",
+    [switch]$OpenAllInboundPorts,
     [switch]$SkipSql,
     [switch]$Cleanup
 )
@@ -78,6 +82,27 @@ function Invoke-InGuest {
     Remove-Item $ps1 -Force -ErrorAction SilentlyContinue
 }
 
+# --- Open ALL inbound ports in the VM's NSG (INSECURE - lab/evaluation only) ---
+function Open-AllInbound {
+    Write-Host ">> Opening ALL inbound ports in the VM's NSG (INSECURE - lab only)..." -ForegroundColor Red
+    $nicId = az vm show -g $ResourceGroup -n $VmName --query "networkProfile.networkInterfaces[0].id" -o tsv
+    $nsgId = az network nic show --ids $nicId --query "networkSecurityGroup.id" -o tsv
+    if ([string]::IsNullOrWhiteSpace($nsgId)) {
+        $nsgName = "$VmName-nsg"
+        Write-Host "No NSG on the NIC - creating '$nsgName' and attaching..." -ForegroundColor Yellow
+        az network nsg create -g $ResourceGroup -n $nsgName -l $Location -o none
+        az network nic update --ids $nicId --network-security-group $nsgName -o none
+    }
+    else {
+        $nsgName = ($nsgId -split '/')[-1]
+    }
+    az network nsg rule create -g $ResourceGroup --nsg-name $nsgName -n AllowAllInbound `
+        --priority 100 --direction Inbound --access Allow --protocol '*' `
+        --source-address-prefixes '*' --source-port-ranges '*' `
+        --destination-address-prefixes '*' --destination-port-ranges '*' -o none
+    Write-Host "All inbound ports opened on NSG '$nsgName' (priority 100, Allow *)." -ForegroundColor Yellow
+}
+
 # ---------------------------------------------------------------------------
 # Cleanup shortcut
 # ---------------------------------------------------------------------------
@@ -107,6 +132,9 @@ if (-not (Test-Vm)) {
         --size $VmSize --admin-username $AdminUser --admin-password $pwd `
         --public-ip-sku Standard --nsg-rule NONE -o none
 }
+
+# Optionally open all inbound ports in the NSG (INSECURE - lab/evaluation only)
+if ($OpenAllInboundPorts) { Open-AllInbound }
 
 # ---------------------------------------------------------------------------
 # Step 2 - Prepare the VM to look like on-premises (Microsoft Learn procedure)
