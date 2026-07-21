@@ -13,7 +13,9 @@ $required = @(
     '"LicenseType":"Paid"',
     'MSFT_ARC_TEST',
     '169.254.169.254',
-    '169.254.169.253'
+    '169.254.169.253',
+    '$arcAlreadyConnected',
+    'if (-not $arcAlreadyConnected)'
 )
 
 foreach ($marker in $required) {
@@ -24,6 +26,20 @@ foreach ($marker in $required) {
 
 if ($content.Contains('SQL2022-SSEI-Eval.exe')) {
     throw 'Evaluation media download must not be present.'
+}
+
+$ahubIndex = $content.LastIndexOf('Set-SqlVmAhub')
+$prepareIndex = $content.LastIndexOf('Invoke-InGuest -ScriptText $prepare')
+$extensionIndex = $content.LastIndexOf("Write-Host '>> Installing Azure extension for SQL Server")
+$rebootIndex = $content.LastIndexOf('az vm restart')
+if ($ahubIndex -lt 0 -or $prepareIndex -lt 0 -or
+    $extensionIndex -lt 0 -or $rebootIndex -lt 0) {
+    throw 'Unable to locate deployment ordering markers.'
+}
+if (-not ($ahubIndex -lt $prepareIndex -and
+          $prepareIndex -lt $extensionIndex -and
+          $extensionIndex -lt $rebootIndex)) {
+    throw 'Required order is AHUB, Arc preparation, Arc SQL extension, then reboot.'
 }
 
 $tokens = $null
