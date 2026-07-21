@@ -1,31 +1,104 @@
 # Azure Arc Workshop (L100–L400)
 
-A hands-on, self-paced workshop that teaches **Azure Arc** from first principles to a
-fully scripted build lab. Published as a static site with GitHub Pages.
+A hands-on, self-paced workshop that introduces **Azure Arc**, explains its business
+and technical value, and guides you through onboarding Windows Server and SQL Server.
+The final build lab creates a repeatable Azure-based simulation for learning purposes.
 
-🔗 **Live site:** https://ibranibeny.github.io/azure-arc-workshop/
+**Live workshop:** https://ibranibeny.github.io/azure-arc-workshop/
 
-## Labs
+## Workshop objectives
 
-| Lab | Level | Topic |
-|-----|-------|-------|
-| 01 | L100 | Azure Arc Overview |
-| 02 | L200 | The Value of Azure Arc |
-| 03 | L300 | Onboard Windows Server & SQL Server |
-| 04 | L400 | Simulate a Windows + SQL Server VM into Azure Arc (Indonesia Central) |
+By the end of this workshop, you will be able to:
 
-## Running the L400 lab
+1. Explain how Azure Arc extends Azure Resource Manager beyond Azure.
+2. Identify governance, security, monitoring, and operations use cases for Azure Arc.
+3. Onboard a Windows Server with the Azure Connected Machine agent.
+4. Register SQL Server as a SQL Server enabled by Azure Arc resource.
+5. Deploy and validate a repeatable Arc lab with PowerShell and Azure CLI.
+6. Distinguish between `LicenseOnly`, `Paid`, and `PAYG` Arc SQL configurations.
 
-The L400 build lab provisions everything with the Azure CLI. See
-[`_labs/04-simulate-vm-sql-arc.md`](_labs/04-simulate-vm-sql-arc.md). The in-guest
-bootstrap script is provided at [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1).
+## Intended audience
 
-> ⚠️ The lab uses a **lab-only** technique (blocking the Azure IMDS endpoint) to make an
-> Azure VM simulate an on-premises server. Never apply this to a production Azure VM.
+- IT professionals and infrastructure administrators learning Azure Arc.
+- Cloud engineers who need a repeatable onboarding workflow.
+- Architects evaluating hybrid and multicloud governance with Azure.
+
+## Workshop path
+
+| Lab | Level | Duration | Outcome |
+|-----|-------|----------|---------|
+| 01 | L100 | 20 min | Explain the Azure Arc control-plane model. |
+| 02 | L200 | 25 min | Map Azure Arc capabilities to business and technical outcomes. |
+| 03 | L300 | 40 min | Onboard Windows Server and SQL Server manually or with automation. |
+| 04 | L400 | 60 min | Build and validate an Azure VM-based Arc simulation. |
+
+## Get started
+
+### 1. Clone the workshop
+
+```bash
+git clone https://github.com/ibranibeny/azure-arc-workshop.git
+cd azure-arc-workshop
+```
+
+### 2. Sign in to Azure
+
+```bash
+az login
+az account set --subscription "<subscription-id-or-name>"
+az account show --output table
+```
+
+### 3. Open the workshop
+
+Use the [live workshop](https://ibranibeny.github.io/azure-arc-workshop/) and complete
+the labs in order. Start with
+[Lab 01 — Azure Arc Overview](https://ibranibeny.github.io/azure-arc-workshop/labs/01-arc-overview/).
+
+### 4. Run an automated build lab
+
+Choose one path:
+
+| Path | Script | SQL licensing | Best Practices Assessment |
+|------|--------|---------------|---------------------------|
+| Evaluation | `scripts/evaluate-arc-on-azure-vm.ps1` | SQL Evaluation + Arc `LicenseOnly` | Not available with `LicenseOnly` |
+| Enterprise | `scripts/deploy-arc-sql-enterprise-lab.ps1` | Azure SQL VM `AHUB` + Arc `Paid` | Eligible after Log Analytics configuration |
+
+Evaluation path:
+
+```powershell
+cd scripts
+./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval
+```
+
+Enterprise path—only when qualifying SQL Server Enterprise licenses with Software
+Assurance or a SQL Server subscription cover the VM:
+
+```powershell
+cd scripts
+./deploy-arc-sql-enterprise-lab.ps1 -AcceptUnsupportedLab
+```
+
+> [!WARNING]
+> Both automated paths use Microsoft's **evaluation-only** technique to make an Azure
+> VM simulate a non-Azure server. SQL Server in Azure Virtual Machines is not a supported
+> production host for SQL Server enabled by Azure Arc. Never apply this design to a
+> production Azure VM.
+
+## Prerequisites
+
+- An Azure subscription with permission to create resource groups, VMs, service
+  principals, and role assignments.
+- Azure CLI 2.53 or later, authenticated with `az login`.
+- Windows PowerShell 5.1 or PowerShell 7 or later.
+- At least four available vCPUs for the selected VM family and region.
+- For the Enterprise path, qualifying SQL Server Enterprise licensing with Software
+  Assurance or a SQL Server subscription.
 
 ## Build locally (optional)
 
-This site uses the [just-the-docs](https://just-the-docs.com/) remote theme and builds
+This site uses the [Minimal Mistakes](https://mmistakes.github.io/minimal-mistakes/)
+remote theme and builds
 natively on GitHub Pages. To preview locally:
 
 ```bash

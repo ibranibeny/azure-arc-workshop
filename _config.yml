@@ -1,8 +1,8 @@
 title: "Azure Arc Workshop"
 subtitle: "Hands-on labs for Azure Arc (L100–L400)"
 description: >-
-  A hands-on Azure Arc workshop: overview, business value, onboarding Windows Server
-  and SQL Server, and an L400 az CLI simulation lab targeting Indonesia Central.
+  A guided Azure Arc workshop with overview, objectives, prerequisites, Windows Server
+  and SQL Server onboarding, and a repeatable L400 PowerShell build lab.
 url: "https://ibranibeny.github.io"
 baseurl: "/azure-arc-workshop"
 

@@ -29,16 +29,43 @@ can adapt it.
 
 ## Get the script
 
+Clone the workshop once, then choose the deployment path that matches your learning
+goal and SQL licensing.
+
 ```powershell
 git clone https://github.com/ibranibeny/azure-arc-workshop.git
 cd azure-arc-workshop/scripts
-# One command runs the whole flow (auto-generates a random admin password):
+
+# Evaluation inventory path (auto-generates a random admin password):
 ./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -OpenAllInboundPorts
+
 # Tear everything down when finished:
 ./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -Cleanup
 ```
 
 The rest of this lab walks through **what each block of that script does** and why.
+
+### Optional Enterprise path for Best Practices Assessment
+
+Best Practices Assessment (BPA) requires Arc SQL license type `Paid` or `PAYG`.
+The repository includes a separate, guarded Enterprise deployment for participants
+whose organization has qualifying SQL Server Enterprise licenses with Software
+Assurance or a SQL Server subscription:
+
+```powershell
+./deploy-arc-sql-enterprise-lab.ps1 -AcceptUnsupportedLab
+
+# Tear down the Enterprise lab when finished:
+./deploy-arc-sql-enterprise-lab.ps1 -Cleanup
+```
+
+This path creates SQL Server 2022 Enterprise, changes the Azure SQL VM registration to
+`AHUB`, onboards the machine to Azure Arc, and configures the Arc SQL extension as
+`Paid`. You must still connect a Log Analytics workspace before enabling BPA.
+
+Do not select this path unless the VM is covered by qualifying Enterprise licenses.
+The Azure VM simulation remains unsupported for production even when licensing is valid.
+{: .notice--danger}
 
 ## Architecture of this lab
 
