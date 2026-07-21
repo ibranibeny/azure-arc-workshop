@@ -16,6 +16,125 @@ report_issue: "https://github.com/ibranibeny/azure-arc-workshop/issues/new"
 |-------|---------|----------|---------|
 | 400 | Cloud engineer / architect | 60 min | Read and run one PowerShell script — [`evaluate-arc-on-azure-vm.ps1`](https://github.com/ibranibeny/azure-arc-workshop/blob/main/scripts/evaluate-arc-on-azure-vm.ps1) — that deploys a Windows Server VM with **SQL Server Evaluation**, **simulates** an on-premises server, and projects both the machine and SQL into Azure Arc. This lab explains the script **block by block**. |
 
+[Run the lab](#run-this-lab){: .btn .btn--primary .btn--large}
+
+## Run this lab
+
+Follow these steps to clone, authenticate, deploy, verify, and clean up the workshop.
+
+### Step 1 — Clone the repository
+
+Open PowerShell and run:
+
+```powershell
+git clone https://github.com/ibranibeny/azure-arc-workshop.git
+Set-Location .\azure-arc-workshop\scripts
+```
+
+If you already cloned the repository, update it before continuing:
+
+```powershell
+git pull
+Set-Location .\scripts
+```
+
+### Step 2 — Sign in and select the subscription
+
+```powershell
+az login
+az account list --output table
+az account set --subscription (Read-Host 'Enter subscription ID or name')
+az account show --output table
+```
+
+Confirm that `az account show` displays the subscription where you want to create
+the workshop resources.
+
+### Step 3 — Choose one deployment path
+
+Run **only one** of the following paths.
+
+#### Path A — Evaluation inventory
+
+Use this path to explore Arc inventory with SQL Server Evaluation and Arc SQL
+`LicenseOnly`. Best Practices Assessment isn't available with this license type.
+
+```powershell
+$ResourceGroup = 'rg-arc-eval'
+$MachineName = 'arc-eval-sql'
+.\evaluate-arc-on-azure-vm.ps1 -ResourceGroup $ResourceGroup -VmName $MachineName
+```
+
+#### Path B — Enterprise/BPA-eligible
+
+Use this path only when qualifying SQL Server Enterprise licenses with Software
+Assurance or a SQL Server subscription cover the VM. It configures Azure SQL VM as
+`AHUB` and Arc SQL as `Paid`. BPA becomes eligible after you connect a Log Analytics
+workspace and enable the assessment.
+
+```powershell
+$ResourceGroup = 'rg-arc-eval-ent'
+$MachineName = 'arc-sql-ent'
+.\deploy-arc-sql-enterprise-lab.ps1 -AcceptUnsupportedLab `
+    -ResourceGroup $ResourceGroup -VmName $MachineName
+```
+
+Both paths simulate a non-Azure server on an Azure VM. Microsoft supports this
+technique only for evaluating Azure Arc. Do not use this topology in production.
+{: .notice--danger}
+
+The deployment can take several minutes. Keep the PowerShell window open until the
+script prints its deployment summary.
+{: .notice--info}
+
+### Step 4 — Verify the deployment
+
+The variables from Step 3 identify the path you selected. Run:
+
+```powershell
+az vm show -d --resource-group $ResourceGroup --name $MachineName `
+    --query '{provisioningState:provisioningState,powerState:powerState}' --output table
+
+az connectedmachine show --resource-group $ResourceGroup --name $MachineName `
+    --query '{status:status,location:location,provisioningState:provisioningState}' --output table
+
+az connectedmachine extension show --resource-group $ResourceGroup `
+    --machine-name $MachineName --name WindowsAgent.SqlServer `
+    --query '{state:properties.provisioningState,license:properties.settings.LicenseType}' `
+    --output table
+
+$SqlResources = az resource list --resource-group $ResourceGroup `
+    --resource-type Microsoft.AzureArcData/sqlServerInstances --output json |
+    ConvertFrom-Json
+
+foreach ($SqlResource in $SqlResources) {
+    az resource show --ids $SqlResource.id `
+        --query '{name:name,edition:properties.edition,license:properties.licenseType,status:properties.status}' `
+        --output table
+}
+```
+
+Expected results:
+
+- The VM reports `Succeeded` and `VM running`.
+- The Arc-enabled server reports `Connected` in `southeastasia`.
+- `WindowsAgent.SqlServer` reports `Succeeded`.
+- The SQL Database Engine reports `Connected` and the license selected in Step 3.
+
+### Step 5 — Clean up
+
+Run the command matching the path selected in Step 3:
+
+```powershell
+# Path A — Evaluation inventory
+.\evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -Cleanup
+
+# Path B — Enterprise/BPA-eligible
+.\deploy-arc-sql-enterprise-lab.ps1 -Cleanup
+```
+
+Resource-group deletion runs asynchronously and can take several minutes.
+
 ## Why this matters
 
 You rarely have a spare physical server for a demo. This lab builds a **self-contained,
@@ -26,46 +145,6 @@ can adapt it.
 
 ![Onboarding a machine to Azure Arc](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/hybrid/arc-enabled-servers/media/arc-enabled-servers-onboarding.png)
 *The onboarding flow: install the Connected Machine agent, then the machine is projected and manageable from Azure. Source: Microsoft Learn (Cloud Adoption Framework).*
-
-## Get the script
-
-Clone the workshop once, then choose the deployment path that matches your learning
-goal and SQL licensing.
-
-```powershell
-git clone https://github.com/ibranibeny/azure-arc-workshop.git
-cd azure-arc-workshop/scripts
-
-# Evaluation inventory path (auto-generates a random admin password):
-./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -OpenAllInboundPorts
-
-# Tear everything down when finished:
-./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -Cleanup
-```
-
-The rest of this lab walks through **what each block of that script does** and why.
-
-### Optional Enterprise path for Best Practices Assessment
-
-Best Practices Assessment (BPA) requires Arc SQL license type `Paid` or `PAYG`.
-The repository includes a separate, guarded Enterprise deployment for participants
-whose organization has qualifying SQL Server Enterprise licenses with Software
-Assurance or a SQL Server subscription:
-
-```powershell
-./deploy-arc-sql-enterprise-lab.ps1 -AcceptUnsupportedLab
-
-# Tear down the Enterprise lab when finished:
-./deploy-arc-sql-enterprise-lab.ps1 -Cleanup
-```
-
-This path creates SQL Server 2022 Enterprise, changes the Azure SQL VM registration to
-`AHUB`, onboards the machine to Azure Arc, and configures the Arc SQL extension as
-`Paid`. You must still connect a Log Analytics workspace before enabling BPA.
-
-Do not select this path unless the VM is covered by qualifying Enterprise licenses.
-The Azure VM simulation remains unsupported for production even when licensing is valid.
-{: .notice--danger}
 
 ## Architecture of this lab
 
@@ -357,55 +436,6 @@ $fqdn      = az vm show -d -g $ResourceGroup -n $VmName --query publicIps -o tsv
 The final block prints a **deployment summary** — including the public IP, the **Arc status**,
 and the **credentials** (the auto-generated password is highlighted) — plus the one-line cleanup
 command.
-
----
-
-## Verify the result
-
-```bash
-RG="rg-arc-eval"; VM_NAME="arc-eval-sql"
-
-# 1) The simulated server is an Arc-enabled server (registered in southeastasia)
-az connectedmachine show \
-  --name "$VM_NAME" --resource-group "$RG" \
-  --query "{name:name, status:status, os:osName, region:location}" -o table
-
-# 2) The SQL extension is installed on the Arc machine
-az connectedmachine extension list \
-  --machine-name "$VM_NAME" --resource-group "$RG" -o table
-
-# 3) The Arc-enabled SQL Server instance resource exists
-az resource list \
-  --resource-group "$RG" \
-  --resource-type "Microsoft.AzureArcData/sqlServerInstances" -o table
-```
-
-In the portal: **Azure Arc → Machines** shows `arc-eval-sql` as **Connected**, and
-**Azure Arc → SQL Server instances** shows the Evaluation-edition instance — both in
-**South East Asia** (filter *Location = all* if you don't see them). The physical VM itself
-still lives in **Indonesia Central**.
-
-<div class="notice--success" markdown="1">
-**Tip:** Explore the value from Labs 01–02: try **Azure Policy**, **Update Manager**, and
-**Defender for Cloud** against your new Arc-enabled server and SQL instance.
-</div>
-
----
-
-## Clean up
-
-One switch reverses the whole deployment (deletes the resource group **and** the onboarding
-service principal):
-
-```powershell
-./evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval -Cleanup
-```
-
-<div class="notice--warning" markdown="1">
-**Warning:** `-Cleanup` runs `az group delete` (async) on the resource group, permanently removing
-the VM, disks, network, and Arc resources — plus `az ad sp delete` on `sp-arc-eval`. Make sure
-you're targeting the lab resource group before running it.
-</div>
 
 ---
 

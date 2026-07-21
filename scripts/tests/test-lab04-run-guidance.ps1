@@ -12,7 +12,11 @@ $required = @(
     'az login',
     "az account set --subscription (Read-Host 'Enter subscription ID or name')",
     '### Step 3 — Choose one deployment path',
-    '.\evaluate-arc-on-azure-vm.ps1 -ResourceGroup rg-arc-eval',
+    "$ResourceGroup = 'rg-arc-eval'",
+    "$MachineName = 'arc-eval-sql'",
+    '.\evaluate-arc-on-azure-vm.ps1 -ResourceGroup $ResourceGroup -VmName $MachineName',
+    "$ResourceGroup = 'rg-arc-eval-ent'",
+    "$MachineName = 'arc-sql-ent'",
     '.\deploy-arc-sql-enterprise-lab.ps1 -AcceptUnsupportedLab',
     '### Step 4 — Verify the deployment',
     'az connectedmachine show',
@@ -38,6 +42,14 @@ if ($runIndex -lt 0 -or $whyIndex -lt 0 -or $runIndex -gt $whyIndex) {
 $quickStart = $content.Substring($runIndex, $whyIndex - $runIndex)
 if ($quickStart.Contains('-OpenAllInboundPorts')) {
     throw 'The quick-start must not enable all inbound ports by default.'
+}
+
+if ($content.Contains('## Verify the result') -or $content.Contains("`n## Clean up")) {
+    throw 'Legacy verification or cleanup sections duplicate the quick-start.'
+}
+
+if ($content.Contains('```bash')) {
+    throw 'Lab 04 execution guidance must use PowerShell consistently.'
 }
 
 Write-Host 'Lab 04 run-guidance contract: PASS' -ForegroundColor Green
